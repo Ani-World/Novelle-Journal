@@ -36,6 +36,8 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } 
       />
+      {/* Catch-all 404 Redirect */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };
