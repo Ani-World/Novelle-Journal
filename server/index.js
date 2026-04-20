@@ -12,18 +12,54 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_for_dev_only';
 
+// Add this after your middleware setup
+app.use((err, req, res, next) => {
+  console.error('Global error handler:', err);
+  res.status(500).json({
+    error: 'Something went wrong',
+    message: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
+
+// Health check with more details
+app.get('/api/health', async (req, res) => {
+  try {
+    // Test database connection
+    const dbCheck = await db.query('SELECT NOW() as time, version() as version');
+    res.json({
+      status: 'ok',
+      database: 'connected',
+      database_time: dbCheck.rows[0].time,
+      postgres_version: dbCheck.rows[0].version,
+      environment: process.env.NODE_ENV || 'development',
+      frontend_url: process.env.FRONTEND_URL,
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    console.error('Health check failed:', err);
+    res.status(500).json({
+      status: 'error',
+      database: 'disconnected',
+      error: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+      environment: process.env.NODE_ENV || 'development',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // Middleware
 app.use(helmet());
 const allowedOrigin = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : 'http://localhost:5173';
 
 app.use(cors({
-  origin: function(origin, callback) {
+  origin: function (origin, callback) {
     // Basic validation: allow local dev or the configured frontend URL (ignoring trailing slash)
     if (!origin) return callback(null, true);
-    
+
     const normalizedOrigin = origin.replace(/\/$/, '');
     const normalizedAllowed = allowedOrigin.replace(/\/$/, '');
-    
+
     if (normalizedOrigin === normalizedAllowed || normalizedOrigin === 'http://localhost:5173') {
       callback(null, true);
     } else {
@@ -36,7 +72,7 @@ app.use(express.json());
 
 // Rate Limiting for Auth
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, 
+  windowMs: 15 * 60 * 1000,
   max: 20,
   message: { error: 'Too many authentication attempts.' }
 });
@@ -45,7 +81,7 @@ const authLimiter = rateLimit({
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
-  
+
   if (!token) return res.status(401).json({ error: 'Access denied. No token provided.' });
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
@@ -59,20 +95,20 @@ const authenticateToken = (req, res, next) => {
 app.get('/api/health', async (req, res) => {
   try {
     const dbCheck = await db.query('SELECT 1');
-    res.json({ 
-      status: 'ok', 
+    res.json({
+      status: 'ok',
       database: 'connected',
       environment: process.env.NODE_ENV || 'development',
       frontend_url: process.env.FRONTEND_URL,
-      timestamp: new Date().toISOString() 
+      timestamp: new Date().toISOString()
     });
   } catch (err) {
-    res.status(500).json({ 
-      status: 'error', 
+    res.status(500).json({
+      status: 'error',
       database: 'disconnected',
       error: err.message,
       environment: process.env.NODE_ENV || 'development',
-      timestamp: new Date().toISOString() 
+      timestamp: new Date().toISOString()
     });
   }
 });
@@ -108,7 +144,7 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
 app.post('/api/auth/login', authLimiter, async (req, res) => {
   try {
     const { email, password, rememberMe } = req.body;
-    
+
     const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
     if (result.rows.length === 0) return res.status(401).json({ error: 'Invalid credentials.' });
 
@@ -119,7 +155,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
     const expiresIn = rememberMe ? '7d' : '24h';
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn });
 
-    res.json({ token, user: { id: user.id, email: user.email, full_name: user.full_name, avatar_url: user.avatar_url }});
+    res.json({ token, user: { id: user.id, email: user.email, full_name: user.full_name, avatar_url: user.avatar_url } });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error.', details: error.message });
   }
@@ -147,7 +183,7 @@ app.get('/api/goals', authenticateToken, async (req, res) => {
 app.post('/api/goals', authenticateToken, async (req, res) => {
   try {
     const { title, description, category, image_url, link_url, why_matters } = req.body;
-    
+
     if (!title) return res.status(400).json({ error: 'Title is required.' });
 
     const newGoal = await db.query(
