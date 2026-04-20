@@ -12,7 +12,37 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_for_dev_only';
 
-// Add this after your middleware setup
+const allowedOrigins = [
+  'https://novelle-journal.vercel.app',
+  'http://localhost:5173'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('Blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Handle preflight requests
+app.options('*', cors());
+
+// Body parsing middleware
+app.use(express.json());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+// Global error handler
 app.use((err, req, res, next) => {
   console.error('Global error handler:', err);
   res.status(500).json({
@@ -20,55 +50,6 @@ app.use((err, req, res, next) => {
     message: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
 });
-
-// Health check with more details
-app.get('/api/health', async (req, res) => {
-  try {
-    // Test database connection
-    const dbCheck = await db.query('SELECT NOW() as time, version() as version');
-    res.json({
-      status: 'ok',
-      database: 'connected',
-      database_time: dbCheck.rows[0].time,
-      postgres_version: dbCheck.rows[0].version,
-      environment: process.env.NODE_ENV || 'development',
-      frontend_url: process.env.FRONTEND_URL,
-      timestamp: new Date().toISOString()
-    });
-  } catch (err) {
-    console.error('Health check failed:', err);
-    res.status(500).json({
-      status: 'error',
-      database: 'disconnected',
-      error: err.message,
-      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-      environment: process.env.NODE_ENV || 'development',
-      timestamp: new Date().toISOString()
-    });
-  }
-});
-
-// Middleware
-app.use(helmet());
-const allowedOrigin = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : 'http://localhost:5173';
-
-app.use(cors({
-  origin: function (origin, callback) {
-    // Basic validation: allow local dev or the configured frontend URL (ignoring trailing slash)
-    if (!origin) return callback(null, true);
-
-    const normalizedOrigin = origin.replace(/\/$/, '');
-    const normalizedAllowed = allowedOrigin.replace(/\/$/, '');
-
-    if (normalizedOrigin === normalizedAllowed || normalizedOrigin === 'http://localhost:5173') {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
-}));
-app.use(express.json());
 
 // Rate Limiting for Auth
 const authLimiter = rateLimit({
@@ -91,7 +72,31 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// Add this before your routes
+// Health check
+app.get('/api/health', async (req, res) => {
+  try {
+    const dbCheck = await db.query('SELECT NOW() as time, version() as version');
+    res.json({
+      status: 'ok',
+      database: 'connected',
+      database_time: dbCheck.rows[0].time,
+      postgres_version: dbCheck.rows[0].version,
+      environment: process.env.NODE_ENV || 'development',
+      frontend_url: process.env.FRONTEND_URL,
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    console.error('Health check failed:', err);
+    res.status(500).json({
+      status: 'error',
+      database: 'disconnected',
+      error: err.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// Test DB endpoint
 app.get('/api/test-db', async (req, res) => {
   try {
     const result = await db.query('SELECT NOW() as current_time');
@@ -108,37 +113,21 @@ app.get('/api/test-db', async (req, res) => {
   }
 });
 
-/* --- DIAGNOSTICS --- */
-app.get('/api/health', async (req, res) => {
-  try {
-    const dbCheck = await db.query('SELECT 1');
-    res.json({
-      status: 'ok',
-      database: 'connected',
-      environment: process.env.NODE_ENV || 'development',
-      frontend_url: process.env.FRONTEND_URL,
-      timestamp: new Date().toISOString()
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: 'error',
-      database: 'disconnected',
-      error: err.message,
-      environment: process.env.NODE_ENV || 'development',
-      timestamp: new Date().toISOString()
-    });
-  }
-});
-
 /* --- AUTH ROUTES --- */
 app.post('/api/auth/register', authLimiter, async (req, res) => {
   try {
     const { email, password, full_name } = req.body;
-    if (!email || !password) return res.status(400).json({ error: 'Email and password required.' });
+    console.log('Registration attempt:', { email, full_name });
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password required.' });
+    }
 
     // Check if user exists
     const userCheck = await db.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (userCheck.rows.length > 0) return res.status(409).json({ error: 'User already exists.' });
+    if (userCheck.rows.length > 0) {
+      return res.status(409).json({ error: 'User already exists.' });
+    }
 
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(password, salt);
@@ -151,6 +140,7 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
     const user = result.rows[0];
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
 
+    console.log('Registration successful:', user.email);
     res.status(201).json({ token, user });
   } catch (error) {
     console.error('Registration error:', error);
@@ -161,19 +151,34 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
 app.post('/api/auth/login', authLimiter, async (req, res) => {
   try {
     const { email, password, rememberMe } = req.body;
+    console.log('Login attempt:', email);
 
     const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (result.rows.length === 0) return res.status(401).json({ error: 'Invalid credentials.' });
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid credentials.' });
+    }
 
     const user = result.rows[0];
     const validPassword = await bcrypt.compare(password, user.password_hash);
-    if (!validPassword) return res.status(401).json({ error: 'Invalid credentials.' });
+    if (!validPassword) {
+      return res.status(401).json({ error: 'Invalid credentials.' });
+    }
 
     const expiresIn = rememberMe ? '7d' : '24h';
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn });
 
-    res.json({ token, user: { id: user.id, email: user.email, full_name: user.full_name, avatar_url: user.avatar_url } });
+    console.log('Login successful:', user.email);
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        full_name: user.full_name,
+        avatar_url: user.avatar_url
+      }
+    });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ error: 'Internal server error.', details: error.message });
   }
 });
@@ -247,19 +252,16 @@ app.delete('/api/goals/:id', authenticateToken, async (req, res) => {
 /* --- COMPLETION LOGIC --- */
 app.post('/api/goals/:id/complete', authenticateToken, async (req, res) => {
   try {
-    // 1. Fetch the goal
     const goalRes = await db.query('SELECT * FROM goals WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
     if (goalRes.rows.length === 0) return res.status(404).json({ error: 'Goal not found.' });
     const goal = goalRes.rows[0];
 
-    // 2. Insert into completed_goals
     const completeRes = await db.query(
       `INSERT INTO completed_goals (user_id, original_goal_id, title, description, category, image_url, why_matters)
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
       [req.user.id, goal.id, goal.title, goal.description, goal.category, goal.image_url, goal.why_matters]
     );
 
-    // 3. Delete from active goals
     await db.query('DELETE FROM goals WHERE id = $1', [goal.id]);
 
     res.status(201).json(completeRes.rows[0]);
@@ -303,5 +305,6 @@ app.delete('/api/completed/:id', authenticateToken, async (req, res) => {
 
 // Start Server
 app.listen(PORT, () => {
-  console.log(`Novelle backend listening on port ${PORT}`);
+  console.log(`✅ Novelle backend listening on port ${PORT}`);
+  console.log(`📍 Allowed origin: ${allowedOrigin}`);
 });
