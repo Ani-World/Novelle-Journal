@@ -17,7 +17,19 @@ app.use(helmet());
 const allowedOrigin = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : 'http://localhost:5173';
 
 app.use(cors({
-  origin: allowedOrigin,
+  origin: function(origin, callback) {
+    // Basic validation: allow local dev or the configured frontend URL (ignoring trailing slash)
+    if (!origin) return callback(null, true);
+    
+    const normalizedOrigin = origin.replace(/\/$/, '');
+    const normalizedAllowed = allowedOrigin.replace(/\/$/, '');
+    
+    if (normalizedOrigin === normalizedAllowed || normalizedOrigin === 'http://localhost:5173') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
@@ -44,8 +56,25 @@ const authenticateToken = (req, res, next) => {
 };
 
 /* --- DIAGNOSTICS --- */
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get('/api/health', async (req, res) => {
+  try {
+    const dbCheck = await db.query('SELECT 1');
+    res.json({ 
+      status: 'ok', 
+      database: 'connected',
+      environment: process.env.NODE_ENV || 'development',
+      frontend_url: process.env.FRONTEND_URL,
+      timestamp: new Date().toISOString() 
+    });
+  } catch (err) {
+    res.status(500).json({ 
+      status: 'error', 
+      database: 'disconnected',
+      error: err.message,
+      environment: process.env.NODE_ENV || 'development',
+      timestamp: new Date().toISOString() 
+    });
+  }
 });
 
 /* --- AUTH ROUTES --- */
@@ -72,7 +101,7 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
     res.status(201).json({ token, user });
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({ error: 'Internal server error.' });
+    res.status(500).json({ error: 'Internal server error.', details: error.message });
   }
 });
 
@@ -92,7 +121,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
 
     res.json({ token, user: { id: user.id, email: user.email, full_name: user.full_name, avatar_url: user.avatar_url }});
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error.' });
+    res.status(500).json({ error: 'Internal server error.', details: error.message });
   }
 });
 
