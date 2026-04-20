@@ -1,41 +1,32 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
-// Parse the DATABASE_URL to ensure it has SSL parameters
-let connectionString = process.env.DATABASE_URL;
-
-// Add SSL parameters if not present
-if (connectionString && !connectionString.includes('sslmode')) {
-  connectionString += '?sslmode=require';
-}
-
+// Use individual parameters instead of connection string
 const pool = new Pool({
-  connectionString: connectionString,
+  host: process.env.PGHOST || 'aws-1-ap-northeast-1.pooler.supabase.com',
+  port: parseInt(process.env.PGPORT) || 6543,
+  database: process.env.PGDATABASE || 'postgres',
+  user: process.env.PGUSER || 'postgres.choenirythoiehzbabvc',
+  password: process.env.PGPASSWORD,
   ssl: {
-    rejectUnauthorized: false, // Required for Supabase
+    rejectUnauthorized: false, // Critical for Supabase
   },
-  connectionTimeoutMillis: 30000, // Increased timeout
+  connectionTimeoutMillis: 30000,
   idleTimeoutMillis: 60000,
-  max: 10, // Reduced from 20 to avoid connection limits
+  max: 10,
   keepAlive: true,
 });
 
-// Test the connection immediately
+// Test the connection
 pool.connect((err, client, release) => {
   if (err) {
     console.error('❌ Database connection failed:', err.message);
-    console.error('Full error:', err);
-    console.error('Connection string (hidden password):',
-      connectionString.replace(/:[^:@]+@/, ':****@'));
+    console.error('Error details:', err);
   } else {
     console.log('✅ Database connected successfully');
+    console.log(`📡 Connected to ${process.env.PGHOST}:${process.env.PGPORT}`);
     release();
   }
-});
-
-// Event listeners for debugging
-pool.on('connect', () => {
-  console.log('📡 New database connection established');
 });
 
 pool.on('error', (err) => {
@@ -44,7 +35,7 @@ pool.on('error', (err) => {
 
 module.exports = {
   query: (text, params) => {
-    console.log('📝 Executing query:', text.substring(0, 100)); // Log first 100 chars
+    console.log('📝 Query:', text.substring(0, 100));
     return pool.query(text, params);
   },
 };
