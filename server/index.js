@@ -91,6 +91,23 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// Add this before your routes
+app.get('/api/test-db', async (req, res) => {
+  try {
+    const result = await db.query('SELECT NOW() as current_time');
+    res.json({
+      success: true,
+      message: 'Database connected!',
+      time: result.rows[0].current_time
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 /* --- DIAGNOSTICS --- */
 app.get('/api/health', async (req, res) => {
   try {
