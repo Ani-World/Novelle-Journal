@@ -168,19 +168,19 @@ export default function Dashboard() {
             className="fixed inset-0 z-[2000] bg-cream dark:bg-charcoal overflow-y-auto"
             onDoubleClick={() => setIsVisionMode(false)}
           >
-            <div className="absolute top-10 right-10 z-50">
+            <div className="absolute top-6 right-6 md:top-10 md:right-10 z-50">
               <motion.button 
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsVisionMode(false)}
-                className="bg-white/10 backdrop-blur-xl text-textPrimary-light dark:text-textPrimary-dark px-8 py-3 rounded-pill font-medium flex items-center gap-2 border border-white/20 shadow-soft transition-all"
+                className="bg-white/10 backdrop-blur-xl text-textPrimary-light dark:text-textPrimary-dark px-4 py-2 md:px-8 md:py-3 rounded-pill font-medium flex items-center gap-2 border border-white/20 shadow-soft transition-all"
               >
-                <X size={18} /> Exit Vision Mode
+                <X size={18} /> <span className="hidden md:inline">Exit Vision Mode</span>
               </motion.button>
             </div>
             
             {/* Collage Grid */}
-            <div className="min-h-screen p-8 md:p-16 columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-8 space-y-8">
+            <div className="min-h-screen p-4 md:p-16 columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 md:gap-8 space-y-4 md:space-y-8">
               {goals.filter(g => g.image_url).map((goal, idx) => (
                 <motion.div
                   key={goal.id}
@@ -202,27 +202,28 @@ export default function Dashboard() {
 
       {/* HEADER */}
       <header className="sticky top-0 z-50 bg-white/70 dark:bg-charcoal/70 backdrop-blur-xl border-b border-borderLight/50 dark:border-borderDark/20 transition-all duration-500">
-        <div className="container mx-auto px-6 lg:px-12 py-5 flex items-center justify-between">
+        <div className="container mx-auto px-4 lg:px-12 py-4 md:py-5 flex items-center justify-between">
           
           <motion.div 
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.8 }}
-            className="flex items-center gap-3"
+            className="flex items-center gap-2 md:gap-3"
           >
-            <Sparkles className="w-7 h-7 text-primary-light dark:text-primary-dark" />
-            <span className="font-serif text-2xl font-bold tracking-tighter text-textPrimary-light dark:text-textPrimary-dark">
+            <Sparkles className="w-6 h-6 md:w-7 md:h-7 text-primary-light dark:text-primary-dark" />
+            <span className="font-serif text-xl md:text-2xl font-bold tracking-tighter text-textPrimary-light dark:text-textPrimary-dark">
               Novelle
             </span>
           </motion.div>
 
-          <div className="flex items-center gap-4 md:gap-8">
+          <div className="flex items-center gap-2 md:gap-8">
             <motion.button 
               whileHover={{ y: -1 }}
               onClick={() => setIsVisionMode(true)}
-              className="hidden md:flex items-center gap-2 px-6 py-2.5 rounded-pill text-sm font-medium border border-borderLight dark:border-borderDark/40 hover:border-gold-light dark:hover:border-gold-dark transition-all duration-300 shadow-sm"
+              className="flex items-center gap-2 px-3 py-2 md:px-6 md:py-2.5 rounded-pill text-sm font-medium border border-borderLight dark:border-borderDark/40 hover:border-gold-light dark:hover:border-gold-dark transition-all duration-300 shadow-sm"
             >
-              <Sparkles size={16} className="text-gold-light" /> Vision Board
+              <Sparkles size={16} className="text-gold-light" /> 
+              <span className="hidden md:inline">Vision Board</span>
             </motion.button>
             
             <button onClick={toggleTheme} className="text-textSecondary-light dark:text-textSecondary-dark hover:text-primary-light transition-colors p-2">
@@ -269,7 +270,7 @@ export default function Dashboard() {
         </motion.div>
       </header>
 
-      <main className="container mx-auto px-6 lg:px-12 mt-16">
+      <main className="container mx-auto px-4 md:px-6 lg:px-12 mt-12 md:mt-16">
         
         {/* CATEGORY PROGRESS RINGS refinement */}
         <motion.div 
@@ -339,9 +340,9 @@ export default function Dashboard() {
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex items-center justify-between mb-12"
+            className="flex items-center justify-between mb-8 md:mb-12"
           >
-            <h2 className="text-4xl font-serif text-textPrimary-light dark:text-textPrimary-dark tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-serif text-textPrimary-light dark:text-textPrimary-dark tracking-tight">
               Current Pursuits
             </h2>
             <div className="h-[1px] bg-borderLight/70 dark:bg-borderDark/30 flex-grow ml-12 max-w-lg hidden md:block"></div>
@@ -354,13 +355,13 @@ export default function Dashboard() {
           ) : filteredGoals.length === 0 ? (
             <motion.div 
               initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-              className="py-32 flex flex-col items-center justify-center text-center bg-white/40 dark:bg-surface-dark/40 rounded-[48px] border border-borderLight/50 dark:border-borderDark/20 shadow-soft"
+              className="py-16 md:py-32 px-6 flex flex-col items-center justify-center text-center bg-white/40 dark:bg-surface-dark/40 rounded-[32px] md:rounded-[48px] border border-borderLight/50 dark:border-borderDark/20 shadow-soft"
             >
-              <div className="w-28 h-28 mb-8 rounded-full bg-primary-light/5 flex items-center justify-center text-primary-light">
-                <Sparkles size={48} className="opacity-60" />
+              <div className="w-20 h-20 md:w-28 md:h-28 mb-6 md:mb-8 rounded-full bg-primary-light/5 flex items-center justify-center text-primary-light">
+                <Sparkles size={32} className="md:size-[48px] opacity-60" />
               </div>
-              <h3 className="text-3xl font-serif mb-4 tracking-tight">Begin your novel story.</h3>
-              <p className="text-textSecondary-light dark:text-textSecondary-dark max-w-md mx-auto mb-10 text-lg font-light leading-relaxed">
+              <h3 className="text-2xl md:text-3xl font-serif mb-4 tracking-tight">Begin your novel story.</h3>
+              <p className="text-textSecondary-light dark:text-textSecondary-dark max-w-md mx-auto mb-8 md:mb-10 text-base md:text-lg font-light leading-relaxed">
                 Add your first pursuit to start visualizing your path. 
                 Your journey towards the extraordinary begins with a single intention.
               </p>
@@ -423,16 +424,16 @@ export default function Dashboard() {
                         </div>
                       )}
 
-                      {/* Subtly Animated Interaction Overlay */}
-                      <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white dark:from-surface-dark via-white/80 dark:via-surface-dark/80 to-transparent flex items-center justify-center gap-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[0.22, 1, 0.36, 1]">
-                        <motion.button whileHover={{ scale: 1.1, y: -2 }} onClick={(e) => { e.stopPropagation(); handleOpenModal(goal); }} className="w-11 h-11 rounded-full bg-white dark:bg-charcoal border border-borderLight dark:border-borderDark shadow-lift flex items-center justify-center text-textSecondary-light hover:text-primary-light transition-all">
-                          <Edit3 size={18} />
+                      {/* Action Buttons: Visible on hover for desktop, always visible but semi-transparent for mobile */}
+                      <div className="absolute inset-x-0 bottom-0 h-20 md:h-24 bg-gradient-to-t from-white dark:from-surface-dark via-white/90 dark:via-surface-dark/90 to-transparent flex items-center justify-center gap-3 md:gap-4 md:translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[0.22, 1, 0.36, 1]">
+                        <motion.button whileHover={{ scale: 1.1, y: -2 }} onClick={(e) => { e.stopPropagation(); handleOpenModal(goal); }} className="w-9 h-9 md:w-11 md:h-11 rounded-full bg-white dark:bg-charcoal border border-borderLight dark:border-borderDark shadow-lift flex items-center justify-center text-textSecondary-light hover:text-primary-light transition-all">
+                          <Edit3 size={16} md:size={18} />
                         </motion.button>
-                        <motion.button whileHover={{ scale: 1.1, y: -2 }} onClick={(e) => { e.stopPropagation(); handleDelete(goal.id); }} className="w-11 h-11 rounded-full bg-white dark:bg-charcoal border border-borderLight dark:border-borderDark shadow-lift flex items-center justify-center text-textSecondary-light hover:text-red-400 transition-all">
-                          <Trash2 size={18} />
+                        <motion.button whileHover={{ scale: 1.1, y: -2 }} onClick={(e) => { e.stopPropagation(); handleDelete(goal.id); }} className="w-9 h-9 md:w-11 md:h-11 rounded-full bg-white dark:bg-charcoal border border-borderLight dark:border-borderDark shadow-lift flex items-center justify-center text-textSecondary-light hover:text-red-400 transition-all">
+                          <Trash2 size={16} md:size={18} />
                         </motion.button>
-                        <motion.button whileHover={{ scale: 1.1, y: -2 }} onClick={(e) => { e.stopPropagation(); handleComplete(goal.id, e); }} className="w-12 h-12 rounded-full bg-primary-light shadow-lift flex items-center justify-center text-white hover:bg-gold-light transition-all">
-                          <CheckCircle2 size={22} />
+                        <motion.button whileHover={{ scale: 1.1, y: -2 }} onClick={(e) => { e.stopPropagation(); handleComplete(goal.id, e); }} className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-primary-light shadow-lift flex items-center justify-center text-white hover:bg-gold-light transition-all">
+                          <CheckCircle2 size={20} md:size={22} />
                         </motion.button>
                       </div>
                     </div>
@@ -450,12 +451,12 @@ export default function Dashboard() {
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              className="flex items-center gap-6 mb-16"
+              className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 mb-12 md:mb-16"
             >
-              <h2 className="text-4xl font-serif text-textPrimary-light dark:text-textPrimary-dark tracking-tight">
+              <h2 className="text-3xl md:text-4xl font-serif text-textPrimary-light dark:text-textPrimary-dark tracking-tight">
                 Cherished Memories
               </h2>
-              <span className="px-5 py-1.5 rounded-pill bg-primary-light/10 text-xs font-bold uppercase tracking-widest text-primary-light border border-primary-light/20">
+              <span className="w-fit px-5 py-1.5 rounded-pill bg-primary-light/10 text-[10px] md:text-xs font-bold uppercase tracking-widest text-primary-light border border-primary-light/20">
                 {completedGoals.length} realized
               </span>
             </motion.div>
@@ -485,7 +486,7 @@ export default function Dashboard() {
                       
                       {/* Memory Card refined */}
                       <div className={`w-full md:w-1/2 ${isEven ? 'md:pr-16' : 'md:pl-16'}`}>
-                        <div className="bg-white/60 dark:bg-surface-dark/40 backdrop-blur-sm p-8 md:p-10 rounded-[40px] border border-borderLight/50 dark:border-borderDark/20 flex flex-col sm:flex-row gap-8 hover:shadow-lift transition-all duration-700 group">
+                        <div className="bg-white/60 dark:bg-surface-dark/40 backdrop-blur-sm p-6 md:p-10 rounded-[32px] md:rounded-[40px] border border-borderLight/50 dark:border-borderDark/20 flex flex-col sm:flex-row gap-6 md:gap-8 hover:shadow-lift transition-all duration-700 group">
                           
                           {memory.image_url && (
                             <div className="w-full sm:w-40 h-40 rounded-[32px] overflow-hidden flex-shrink-0 shadow-soft">
@@ -526,9 +527,9 @@ export default function Dashboard() {
         whileHover={{ scale: 1.1, rotate: 90 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => handleOpenModal()}
-        className="fixed bottom-10 right-10 w-16 h-16 rounded-full bg-primary-light text-white shadow-lift flex items-center justify-center hover:bg-gold-light transition-all duration-500 z-[1000] border-4 border-white dark:border-charcoal"
+        className="fixed bottom-6 right-6 md:bottom-10 md:right-10 w-14 h-14 md:w-16 md:h-16 rounded-full bg-primary-light text-white shadow-lift flex items-center justify-center hover:bg-gold-light transition-all duration-500 z-[1000] border-4 border-white dark:border-charcoal"
       >
-        <Plus size={32} />
+        <Plus size={28} md:size={32} />
       </motion.button>
 
       {/* ADD / EDIT GOAL MODAL refinement */}
@@ -546,25 +547,25 @@ export default function Dashboard() {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.98, opacity: 0, y: 10 }}
               transition={{ type: 'spring', damping: 25, stiffness: 400 }}
-              className="relative w-full max-w-2xl bg-white dark:bg-surface-dark rounded-[48px] p-10 md:p-14 shadow-2xl border border-borderLight dark:border-borderDark/40 overflow-y-auto max-h-[90vh]"
+              className="relative w-full max-w-2xl bg-white dark:bg-surface-dark rounded-[32px] md:rounded-[48px] p-6 md:p-14 shadow-2xl border border-borderLight dark:border-borderDark/40 overflow-y-auto max-h-[90vh]"
             >
               <button 
                 onClick={() => setIsModalOpen(false)} 
-                className="absolute top-8 right-8 w-12 h-12 rounded-full flex items-center justify-center bg-cream/50 dark:bg-charcoal/50 text-textSecondary-light hover:text-primary-light transition-all"
+                className="absolute top-4 right-4 md:top-8 md:right-8 w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center bg-cream/50 dark:bg-charcoal/50 text-textSecondary-light hover:text-primary-light transition-all"
               >
-                <X size={24} />
+                <X size={20} md:size={24} />
               </button>
 
-              <div className="text-center mb-12">
+              <div className="text-center mb-8 md:mb-12">
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.2 }}
-                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-pill bg-primary-light/10 text-primary-light text-[10px] font-bold uppercase tracking-widest mb-6 border border-primary-light/10"
+                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-pill bg-primary-light/10 text-primary-light text-[10px] font-bold uppercase tracking-widest mb-4 md:mb-6 border border-primary-light/10"
                 >
                   <Sparkles size={12} /> New Chapter
                 </motion.div>
-                <h2 className="text-4xl font-serif text-textPrimary-light dark:text-textPrimary-dark tracking-tighter">
+                <h2 className="text-2xl md:text-4xl font-serif text-textPrimary-light dark:text-textPrimary-dark tracking-tighter">
                   {editingId ? 'Refine Your Dream' : 'Add to Your Journey'}
                 </h2>
               </div>
@@ -633,15 +634,15 @@ export default function Dashboard() {
                   ></textarea>
                 </div>
 
-                <div className="pt-8 flex gap-6">
-                  <button type="button" onClick={() => setIsModalOpen(false)} className="px-10 py-5 rounded-pill font-bold tracking-widest text-[11px] uppercase border border-borderLight/80 dark:border-borderDark/60 text-textSecondary-light hover:bg-cream dark:hover:bg-charcoal transition-all flex-grow">
+                <div className="pt-4 md:pt-8 flex flex-col md:flex-row gap-4 md:gap-6">
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="px-10 py-4 md:py-5 rounded-pill font-bold tracking-widest text-[11px] uppercase border border-borderLight/80 dark:border-borderDark/60 text-textSecondary-light hover:bg-cream dark:hover:bg-charcoal transition-all flex-grow order-2 md:order-1">
                     Cancel
                   </button>
                   <motion.button 
                     whileHover={{ y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     type="submit" disabled={isSubmitting} 
-                    className="px-10 py-5 rounded-pill font-bold tracking-widest text-[11px] uppercase bg-primary-light shadow-lift hover:shadow-2xl transition-all text-white flex-grow disabled:opacity-70 flex justify-center items-center gap-3"
+                    className="px-10 py-4 md:py-5 rounded-pill font-bold tracking-widest text-[11px] uppercase bg-primary-light shadow-lift hover:shadow-2xl transition-all text-white flex-grow disabled:opacity-70 flex justify-center items-center gap-3 order-1 md:order-2"
                   >
                     {isSubmitting ? 'Curating...' : (editingId ? 'Refine' : 'Add to Collection')}
                   </motion.button>

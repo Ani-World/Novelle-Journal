@@ -41,6 +41,11 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+/* --- DIAGNOSTICS --- */
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 /* --- AUTH ROUTES --- */
 app.post('/api/auth/register', authLimiter, async (req, res) => {
   try {

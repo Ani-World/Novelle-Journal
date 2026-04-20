@@ -26,6 +26,13 @@
   .glass-dark {
     @apply bg-charcoal/70 backdrop-blur-md border border-white/10;
   }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* Custom Scrollbar */

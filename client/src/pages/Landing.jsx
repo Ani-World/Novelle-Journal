@@ -76,18 +76,18 @@ const Landing = () => {
       </motion.div>
 
       {/* Right Side: Auth Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 relative bg-cream/50">
-        <div className="w-full max-w-md">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 lg:p-24 relative bg-cream/50 overflow-y-auto">
+        <div className="w-full max-w-md my-auto">
           {/* Mobile Header */}
-          <div className="lg:hidden mb-12 text-center">
+          <div className="lg:hidden mb-10 text-center">
             <motion.h1 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="text-4xl font-serif tracking-tight flex items-center justify-center gap-2 mb-2"
+              className="text-3xl font-serif tracking-tight flex items-center justify-center gap-2 mb-2"
             >
-              <Sparkles className="w-8 h-8 text-primary-light" /> Novelle
+              <Sparkles className="w-6 h-6 text-primary-light" /> Novelle
             </motion.h1>
-            <p className="text-textSecondary-light dark:text-textSecondary-dark italic font-serif">
+            <p className="text-textSecondary-light dark:text-textSecondary-dark italic font-serif text-sm">
               Begin your journey
             </p>
           </div>
@@ -97,10 +97,10 @@ const Landing = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
           >
-            <h2 className="text-4xl font-serif mb-3 tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-serif mb-3 tracking-tight">
               {isLogin ? 'Welcome back' : 'Start your journey'}
             </h2>
-            <p className="text-textSecondary-light dark:text-textSecondary-dark mb-10 text-lg font-light leading-relaxed">
+            <p className="text-textSecondary-light dark:text-textSecondary-dark mb-8 md:mb-10 text-base md:text-lg font-light leading-relaxed">
               {isLogin 
                 ? 'Enter your details to access your vision board.' 
                 : 'Create an account to curate your beautiful experiences.'}
@@ -131,7 +131,7 @@ const Landing = () => {
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full px-5 py-4 rounded-xl bg-white/50 dark:bg-surface-dark/50 backdrop-blur-sm border border-borderLight dark:border-borderDark focus:border-primary-light focus:ring-4 focus:ring-primary-light/5 outline-none transition-all duration-300"
+                    className="w-full px-5 py-3.5 rounded-xl bg-white/50 dark:bg-surface-dark/50 backdrop-blur-sm border border-borderLight dark:border-borderDark focus:border-primary-light focus:ring-4 focus:ring-primary-light/5 outline-none transition-all duration-300"
                     placeholder="Jane Doe"
                   />
                 </motion.div>
@@ -146,7 +146,7 @@ const Landing = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-5 py-4 rounded-xl bg-white/50 dark:bg-surface-dark/50 backdrop-blur-sm border border-borderLight dark:border-borderDark focus:border-primary-light focus:ring-4 focus:ring-primary-light/5 outline-none transition-all duration-300"
+                  className="w-full px-5 py-3.5 rounded-xl bg-white/50 dark:bg-surface-dark/50 backdrop-blur-sm border border-borderLight dark:border-borderDark focus:border-primary-light focus:ring-4 focus:ring-primary-light/5 outline-none transition-all duration-300"
                   placeholder="jane@example.com"
                 />
               </div>
@@ -161,7 +161,7 @@ const Landing = () => {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-5 py-4 rounded-xl bg-white/50 dark:bg-surface-dark/50 backdrop-blur-sm border border-borderLight dark:border-borderDark focus:border-primary-light focus:ring-4 focus:ring-primary-light/5 outline-none transition-all duration-300 pr-12"
+                    className="w-full px-5 py-3.5 rounded-xl bg-white/50 dark:bg-surface-dark/50 backdrop-blur-sm border border-borderLight dark:border-borderDark focus:border-primary-light focus:ring-4 focus:ring-primary-light/5 outline-none transition-all duration-300 pr-12"
                     placeholder="••••••••"
                   />
                   <button 
@@ -196,7 +196,7 @@ const Landing = () => {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={loading}
-                className="w-full mt-10 py-4 px-8 rounded-pill bg-gradient-to-r from-primary-light to-[#E8D3C8] text-white font-semibold shadow-soft hover:shadow-lg transition-all duration-500 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full mt-6 md:mt-10 py-3.5 md:py-4 px-8 rounded-pill bg-gradient-to-r from-primary-light to-[#E8D3C8] text-white font-semibold shadow-soft hover:shadow-lg transition-all duration-500 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
                 {!loading && <ArrowRight size={20} />}
