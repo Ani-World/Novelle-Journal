@@ -1,32 +1,24 @@
 import axios from 'axios';
 
+// TEMPORARY: Hardcoded for production
+const API_URL = 'https://novelle-backend-u8ph.onrender.com/api';
+
+console.log('🔧 Using API URL:', API_URL);
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json'
-  }
+    'Content-Type': 'application/json',
+  },
 });
 
-// Intercept requests to add token
+// Add token to requests if it exists
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('novelle-token');
+  const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
-}, (error) => Promise.reject(error));
-
-// Intercept responses to handle auth errors
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 401) {
-      localStorage.removeItem('novelle-token');
-      localStorage.removeItem('novelle-user');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
+});
 
 export default api;
