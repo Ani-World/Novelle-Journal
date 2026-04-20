@@ -306,5 +306,5 @@ app.delete('/api/completed/:id', authenticateToken, async (req, res) => {
 // Start Server
 app.listen(PORT, () => {
   console.log(`✅ Novelle backend listening on port ${PORT}`);
-  console.log(`📍 Allowed origin: ${allowedOrigin}`);
+  console.log(`📍 Allowed origins: ${allowedOrigins.join(', ')}`);
 });
