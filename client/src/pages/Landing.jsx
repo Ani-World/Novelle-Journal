@@ -26,7 +26,9 @@ const Landing = () => {
         await register(fullName, email, password);
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'An error occurred. Please try again.');
+      const errorMsg = err.response?.data?.error || 'An error occurred.';
+      const errorDetails = err.response?.data?.details ? `: ${err.response.data.details}` : '';
+      setError(`${errorMsg}${errorDetails} Please try again.`);
     } finally {
       setLoading(false);
     }

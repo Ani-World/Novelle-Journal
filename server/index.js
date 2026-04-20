@@ -130,7 +130,7 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
     const result = await db.query('SELECT id, email, full_name, avatar_url FROM users WHERE id = $1', [req.user.id]);
     res.json(result.rows[0]);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error.' });
+    res.status(500).json({ error: 'Internal server error.', details: error.message });
   }
 });
 
@@ -140,7 +140,7 @@ app.get('/api/goals', authenticateToken, async (req, res) => {
     const goals = await db.query('SELECT * FROM goals WHERE user_id = $1 ORDER BY created_at DESC', [req.user.id]);
     res.json(goals.rows);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error.' });
+    res.status(500).json({ error: 'Internal server error.', details: error.message });
   }
 });
 
@@ -158,7 +158,7 @@ app.post('/api/goals', authenticateToken, async (req, res) => {
 
     res.status(201).json(newGoal.rows[0]);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error.' });
+    res.status(500).json({ error: 'Internal server error.', details: error.message });
   }
 });
 
@@ -177,7 +177,7 @@ app.put('/api/goals/:id', authenticateToken, async (req, res) => {
     if (result.rows.length === 0) return res.status(404).json({ error: 'Goal not found or unauthorized.' });
     res.json(result.rows[0]);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error.' });
+    res.status(500).json({ error: 'Internal server error.', details: error.message });
   }
 });
 
@@ -187,7 +187,7 @@ app.delete('/api/goals/:id', authenticateToken, async (req, res) => {
     if (result.rows.length === 0) return res.status(404).json({ error: 'Goal not found or unauthorized.' });
     res.json({ message: 'Goal deleted.' });
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error.' });
+    res.status(500).json({ error: 'Internal server error.', details: error.message });
   }
 });
 
@@ -211,7 +211,7 @@ app.post('/api/goals/:id/complete', authenticateToken, async (req, res) => {
 
     res.status(201).json(completeRes.rows[0]);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error.' });
+    res.status(500).json({ error: 'Internal server error.', details: error.message });
   }
 });
 
@@ -220,7 +220,7 @@ app.get('/api/completed', authenticateToken, async (req, res) => {
     const completed = await db.query('SELECT * FROM completed_goals WHERE user_id = $1 ORDER BY completed_at DESC', [req.user.id]);
     res.json(completed.rows);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error.' });
+    res.status(500).json({ error: 'Internal server error.', details: error.message });
   }
 });
 
