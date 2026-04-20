@@ -14,8 +14,10 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_for_dev_only';
 
 // Middleware
 app.use(helmet());
+const allowedOrigin = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : 'http://localhost:5173';
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: allowedOrigin,
   credentials: true
 }));
 app.use(express.json());
