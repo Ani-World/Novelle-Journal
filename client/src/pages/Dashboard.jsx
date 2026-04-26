@@ -168,20 +168,34 @@ export default function Dashboard() {
             className="fixed inset-0 z-[2000] bg-cream dark:bg-charcoal overflow-y-auto"
             onDoubleClick={() => setIsVisionMode(false)}
           >
-            <div className="absolute top-6 right-6 md:top-10 md:right-10 z-50">
+            <div className="absolute top-6 left-6 md:top-10 md:left-10 z-50 flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+              <h2 className="text-xl md:text-3xl font-serif text-textPrimary-light dark:text-textPrimary-dark tracking-tight bg-cream/70 dark:bg-charcoal/70 backdrop-blur-md px-4 py-1.5 md:px-0 md:py-0 md:bg-transparent md:backdrop-blur-none rounded-2xl md:rounded-none">
+                {activeCategoryFilter === "All" ? "Combined Vision" : `${activeCategoryFilter} Vision`}
+              </h2>
+              {activeCategoryFilter !== "All" && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); setActiveCategoryFilter("All"); }}
+                  className="px-4 py-1.5 rounded-pill bg-white/60 dark:bg-charcoal/60 backdrop-blur-md text-[10px] md:text-xs font-bold uppercase tracking-widest border border-borderLight dark:border-borderDark/50 text-textPrimary-light dark:text-textPrimary-dark hover:bg-white dark:hover:bg-charcoal transition-all shadow-sm"
+                >
+                  Show Combined
+                </button>
+              )}
+            </div>
+
+            <div className="absolute top-6 right-4 md:top-10 md:right-10 z-50">
               <motion.button 
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsVisionMode(false)}
-                className="bg-white/10 backdrop-blur-xl text-textPrimary-light dark:text-textPrimary-dark px-4 py-2 md:px-8 md:py-3 rounded-pill font-medium flex items-center gap-2 border border-white/20 shadow-soft transition-all"
+                className="bg-white/10 backdrop-blur-xl text-textPrimary-light dark:text-textPrimary-dark px-3 py-2 md:px-8 md:py-3 rounded-pill font-medium flex items-center gap-2 border border-white/20 shadow-soft transition-all"
               >
-                <X size={18} /> <span className="hidden md:inline">Exit Vision Mode</span>
+                <X size={18} /> <span className="hidden md:inline">Exit Vision</span>
               </motion.button>
             </div>
             
             {/* Collage Grid */}
-            <div className="min-h-screen p-4 md:p-16 columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 md:gap-8 space-y-4 md:space-y-8">
-              {goals.filter(g => g.image_url).map((goal, idx) => (
+            <div className="min-h-screen p-4 pt-28 md:p-16 md:pt-32 columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 md:gap-8 space-y-4 md:space-y-8">
+              {filteredGoals.filter(g => g.image_url).map((goal, idx) => (
                 <motion.div
                   key={goal.id}
                   initial={{ opacity: 0, y: 20 }}
