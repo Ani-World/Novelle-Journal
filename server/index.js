@@ -303,6 +303,42 @@ app.delete('/api/completed/:id', authenticateToken, async (req, res) => {
   }
 });
 
+/* --- CATEGORIES ROUTES --- */
+app.get('/api/categories', authenticateToken, async (req, res) => {
+  try {
+    const categories = await db.query('SELECT * FROM user_categories WHERE user_id = $1 ORDER BY created_at ASC', [req.user.id]);
+    res.json(categories.rows);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error.', details: error.message });
+  }
+});
+
+app.post('/api/categories', authenticateToken, async (req, res) => {
+  try {
+    const { name, icon, color } = req.body;
+    if (!name) return res.status(400).json({ error: 'Name is required.' });
+
+    const newCategory = await db.query(
+      `INSERT INTO user_categories (user_id, name, icon, color) 
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [req.user.id, name, icon || '✨', color || '#f0dfcf']
+    );
+    res.status(201).json(newCategory.rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error.', details: error.message });
+  }
+});
+
+app.delete('/api/categories/:id', authenticateToken, async (req, res) => {
+  try {
+    const result = await db.query('DELETE FROM user_categories WHERE id = $1 AND user_id = $2 RETURNING *', [req.params.id, req.user.id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Category not found or unauthorized.' });
+    res.json({ message: 'Category deleted.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error.', details: error.message });
+  }
+});
+
 // Start Server
 app.listen(PORT, () => {
   console.log(`✅ Novelle backend listening on port ${PORT}`);

@@ -17,7 +17,7 @@ const QUOTES = [
   "Your personal tapestry of dreams."
 ];
 
-const CATEGORIES = [
+const DEFAULT_CATEGORIES = [
   { name: "Travel", icon: "🌍", color: "#e1cdc1" },
   { name: "Skills", icon: "📚", color: "#d6e0d9" },
   { name: "Fitness", icon: "💪", color: "#f0dfcf" },
@@ -32,10 +32,12 @@ export default function Dashboard() {
   
   const [goals, setGoals] = useState([]);
   const [completedGoals, setCompletedGoals] = useState([]);
+  const [customCategories, setCustomCategories] = useState([]);
   const [activeCategoryFilter, setActiveCategoryFilter] = useState("All");
   
   const [isVisionMode, setIsVisionMode] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBoardModalOpen, setIsBoardModalOpen] = useState(false);
   const [quote, setQuote] = useState(QUOTES[0]);
   
   const [isLoading, setIsLoading] = useState(true);
@@ -47,6 +49,11 @@ export default function Dashboard() {
   const [editingId, setEditingId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [newBoardData, setNewBoardData] = useState({ name: '', icon: '✨' });
+  const [isCreatingBoard, setIsCreatingBoard] = useState(false);
+
+  const allCategories = [...DEFAULT_CATEGORIES, ...customCategories];
+
   useEffect(() => {
     setQuote(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
     fetchData();
@@ -55,16 +62,35 @@ export default function Dashboard() {
   const fetchData = async () => {
     try {
         setIsLoading(true);
-        const [goalsRes, completedRes] = await Promise.all([
+        const [goalsRes, completedRes, categoriesRes] = await Promise.all([
           api.get('/goals'),
-          api.get('/completed')
+          api.get('/completed'),
+          api.get('/categories').catch(() => ({ data: [] }))
         ]);
         setGoals(goalsRes.data);
         setCompletedGoals(completedRes.data);
+        setCustomCategories(categoriesRes.data);
     } catch (err) {
         console.error("Failed to fetch data", err);
     } finally {
         setIsLoading(false);
+    }
+  };
+
+  const handleCreateBoard = async (e) => {
+    e.preventDefault();
+    setIsCreatingBoard(true);
+    try {
+      const { data } = await api.post('/categories', newBoardData);
+      setCustomCategories([...customCategories, data]);
+      setIsBoardModalOpen(false);
+      setNewBoardData({ name: '', icon: '✨' });
+      setActiveCategoryFilter(data.name);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to create board.");
+    } finally {
+      setIsCreatingBoard(false);
     }
   };
 
@@ -305,7 +331,7 @@ export default function Dashboard() {
               Everything
             </button>
 
-            {CATEGORIES.map((cat, idx) => {
+            {allCategories.map((cat, idx) => {
               const progress = calculateProgress(cat.name);
               const radius = 9;
               const circumference = 2 * Math.PI * radius;
@@ -346,6 +372,14 @@ export default function Dashboard() {
                 </button>
               );
             })}
+
+            <button
+              onClick={() => setIsBoardModalOpen(true)}
+              className="flex-shrink-0 flex items-center gap-2 px-6 py-3.5 rounded-pill text-sm font-bold tracking-wide transition-all duration-500 border bg-white/50 dark:bg-surface-dark/50 border-dashed border-borderLight dark:border-borderDark text-textSecondary-light dark:text-textSecondary-dark hover:border-primary-light hover:text-primary-light shadow-sm hover:shadow-md"
+            >
+              <Plus size={16} />
+              <span>New Board</span>
+            </button>
           </div>
         </motion.div>
 
@@ -607,7 +641,7 @@ export default function Dashboard() {
                         value={formData.category} onChange={e=>setFormData({...formData, category: e.target.value})}
                         className="w-full px-7 py-5 rounded-2xl bg-cream/50 dark:bg-charcoal/50 border border-borderLight/60 dark:border-borderDark/40 focus:border-primary-light transition-all outline-none appearance-none cursor-pointer text-[15px] font-medium"
                       >
-                        {CATEGORIES.map(c => <option key={c.name} value={c.name}>{c.icon} &nbsp; {c.name}</option>)}
+                        {allCategories.map(c => <option key={c.name} value={c.name}>{c.icon} &nbsp; {c.name}</option>)}
                       </select>
                       <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-textSecondary-light/40">
                         <Plus size={16} className="rotate-45" />
@@ -661,6 +695,74 @@ export default function Dashboard() {
                     {isSubmitting ? 'Curating...' : (editingId ? 'Refine' : 'Add to Collection')}
                   </motion.button>
                 </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* NEW BOARD MODAL */}
+      <AnimatePresence>
+        {isBoardModalOpen && (
+          <div className="fixed inset-0 z-[6000] flex items-center justify-center px-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-charcoal/40 backdrop-blur-xl"
+              onClick={() => setIsBoardModalOpen(false)}
+            ></motion.div>
+            
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.98, opacity: 0, y: 10 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 400 }}
+              className="relative w-full max-w-md bg-white dark:bg-surface-dark rounded-[32px] p-8 md:p-10 shadow-2xl border border-borderLight dark:border-borderDark/40"
+            >
+              <button 
+                onClick={() => setIsBoardModalOpen(false)} 
+                className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center bg-cream/50 dark:bg-charcoal/50 text-textSecondary-light hover:text-primary-light transition-all"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-serif text-textPrimary-light dark:text-textPrimary-dark tracking-tighter">
+                  Create New Board
+                </h2>
+              </div>
+
+              <form onSubmit={handleCreateBoard} className="space-y-6">
+                <div className="flex gap-4">
+                  <div className="w-1/3 space-y-2">
+                    <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-textSecondary-light/60 dark:text-textSecondary-dark/60 mb-2 ml-1">
+                      Emoji
+                    </label>
+                    <input required
+                      value={newBoardData.icon} onChange={e=>setNewBoardData({...newBoardData, icon: e.target.value})}
+                      className="w-full px-4 py-4 text-center rounded-2xl bg-cream/50 dark:bg-charcoal/50 border border-borderLight/60 dark:border-borderDark/40 focus:border-primary-light transition-all text-2xl" 
+                      maxLength={2}
+                    />
+                  </div>
+                  <div className="w-2/3 space-y-2">
+                    <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-textSecondary-light/60 dark:text-textSecondary-dark/60 mb-2 ml-1">
+                      Board Name
+                    </label>
+                    <input required
+                      value={newBoardData.name} onChange={e=>setNewBoardData({...newBoardData, name: e.target.value})}
+                      className="w-full px-5 py-4 rounded-2xl bg-cream/50 dark:bg-charcoal/50 border border-borderLight/60 dark:border-borderDark/40 focus:border-primary-light transition-all outline-none font-serif text-lg" 
+                      placeholder="e.g. Before 25" 
+                    />
+                  </div>
+                </div>
+
+                <motion.button 
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="submit" disabled={isCreatingBoard} 
+                  className="w-full py-4 rounded-pill font-bold tracking-widest text-[11px] uppercase bg-primary-light shadow-lift hover:shadow-2xl transition-all text-white disabled:opacity-70 flex justify-center items-center gap-3"
+                >
+                  {isCreatingBoard ? 'Creating...' : 'Create Board'}
+                </motion.button>
               </form>
             </motion.div>
           </div>
